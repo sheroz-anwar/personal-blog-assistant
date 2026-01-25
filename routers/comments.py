@@ -12,10 +12,10 @@ from sqlalchemy.orm import Session
 
 # Import your database models and schemas
 # Adjust imports based on your project structure
-from models import Comment, Post, User  # Update import path as needed
+from models import Comment, Post, User, UserRole  # Update import path as needed
 from schemas import CommentCreate, CommentUpdate, CommentResponse  # Update import path as needed
 from database import get_db  # Update import path as needed
-from auth import get_current_user  # Update import path as needed
+from auth import get_current_active_user  # Update import path as needed
 
 router = APIRouter(
     prefix="/api/posts/{post_id}/comments",
@@ -35,7 +35,7 @@ def create_comment(
     post_id: int,
     comment: CommentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
     Create a new comment on a post.
@@ -231,7 +231,7 @@ def update_comment(
         )
     
     # Check authorization (only author or admin can update)
-    if comment.author_id != current_user.id and not getattr(current_user, 'is_admin', False):
+    if comment.author_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to update this comment"
@@ -259,7 +259,7 @@ def delete_comment(
     post_id: int,
     comment_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
     Delete an existing comment.
@@ -294,7 +294,7 @@ def delete_comment(
         )
     
     # Check authorization (only author or admin can delete)
-    if comment.author_id != current_user.id and not getattr(current_user, 'is_admin', False):
+    if comment.author_id != current_user.id and current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this comment"
