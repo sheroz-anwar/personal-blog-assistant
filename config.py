@@ -68,6 +68,60 @@ class JWTSettings(BaseSettings):
         env_prefix = "JWT_"
 
 
+class EmailSettings(BaseSettings):
+    """Email/SMTP configuration settings."""
+
+    smtp_host: str = Field(
+        default="smtp.gmail.com",
+        description="SMTP server host",
+    )
+    smtp_port: int = Field(
+        default=587,
+        description="SMTP server port",
+        ge=1,
+        le=65535,
+    )
+    smtp_username: str = Field(
+        default="",
+        description="SMTP authentication username",
+    )
+    smtp_password: str = Field(
+        default="",
+        description="SMTP authentication password",
+    )
+    smtp_from_email: str = Field(
+        default="noreply@personalblog.com",
+        description="From email address",
+    )
+    smtp_from_name: str = Field(
+        default="Personal Blog Assistant",
+        description="From name",
+    )
+
+    class Config:
+        env_prefix = "SMTP_"
+
+
+class OAuthSettings(BaseSettings):
+    """OAuth configuration settings."""
+
+    google_client_id: str = Field(
+        default="",
+        description="Google OAuth 2.0 client ID",
+    )
+    google_client_secret: str = Field(
+        default="",
+        description="Google OAuth 2.0 client secret",
+    )
+    google_redirect_uri: str = Field(
+        default="http://localhost:8000/api/users/oauth/google/callback",
+        description="Google OAuth redirect URI",
+    )
+
+    class Config:
+        env_prefix = "OAUTH_"
+
+
 class ApplicationSettings(BaseSettings):
     """General application configuration settings."""
 
@@ -116,6 +170,8 @@ class Settings(BaseSettings):
 
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     jwt: JWTSettings = Field(default_factory=JWTSettings)
+    email: EmailSettings = Field(default_factory=EmailSettings)
+    oauth: OAuthSettings = Field(default_factory=OAuthSettings)
     application: ApplicationSettings = Field(default_factory=ApplicationSettings)
 
     class Config:
